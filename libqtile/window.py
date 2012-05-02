@@ -937,8 +937,8 @@ class Window(_Window):
         elif name == "_NET_WM_DESKTOP":
             pass
         elif name == "_NET_WM_USER_TIME":
-            if not self.qtile.config.follow_mouse_focus and \
-                            self.group.currentWindow != self:
+            if (self.qtile.config.follow_mouse_focus and
+                    self.group.currentWindow != self):
                 self.group.focus(self, False)
         else:
             self.qtile.log.info("Unknown window property: %s" % name)
