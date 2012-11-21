@@ -43,6 +43,9 @@ class Gap(command.CommandObject):
     def _configure(self, qtile, screen):
         self.qtile, self.screen = qtile, screen
 
+    def draw(self):
+        pass
+
     @property
     def x(self):
         s = self.screen
@@ -153,7 +156,7 @@ class Bar(Gap):
             raise confreader.ConfigError("Only one STRETCH widget allowed!")
 
         Gap._configure(self, qtile, screen)
-        self.window = window.Internal(
+        self.window = window.Internal.create(
                         self.qtile,
                         self.x, self.y, self.width, self.height,
                         self.opacity
