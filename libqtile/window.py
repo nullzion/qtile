@@ -125,6 +125,7 @@ class _Window(command.CommandObject):
         self.borderwidth = 0
         self.bordercolor = None
         self.name = "<no name>"
+        self.strut = None
         self.state = NormalState
         self.window_type = "normal"
         self._float_state = NOT_FLOATING
@@ -454,12 +455,13 @@ class _Window(command.CommandObject):
                 e = struct.pack('BBHII5I', *vals)
                 self.window.send_event(e)
             if self.hints['input']:
-                    self.window.set_input_focus()
+                self.window.set_input_focus()
             try:
                 if warp and self.qtile.config.cursor_warp:
                     self.window.warp_pointer(self.width // 2, self.height // 2)
             except AttributeError:
                 pass
+        self.qtile.root.set_property("_NET_ACTIVE_WINDOW", self.window.wid)
         hook.fire("client_focus", self)
 
     def _items(self, name, sel):
@@ -579,6 +581,7 @@ class Static(_Window):
         self.screen = screen
         if None not in (x, y, width, height):
             self.place(x, y, width, height, 0, 0)
+        self.update_strut()
 
     def handle_ConfigureRequest(self, e):
         cw = xcb.xproto.ConfigWindow
@@ -600,6 +603,20 @@ class Static(_Window):
             self.bordercolor
         )
         return False
+
+    def update_strut(self):
+        strut = self.window.get_property("_NET_WM_STRUT_PARTIAL", unpack="I"*12)
+        if not strut:
+            strut = self.window.get_property("_NET_WM_STRUT", unpack="I"*4)
+        if not strut:
+            strut = (0, 0, 0, 0)
+        self.qtile.update_gaps(strut, self.strut)
+        self.strut = strut
+
+    def handle_PropertyNotify(self, e):
+        name = self.qtile.conn.atoms.get_name(e.atom)
+        if name in ("_NET_WM_STRUT_PARTIAL", "_NET_WM_STRUT"):
+            self.update_strut()
 
     def __repr__(self):
         return "Static(%s)" % self.name
