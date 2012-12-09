@@ -170,6 +170,7 @@ class _TextBox(_Widget):
 
             font
             fontsize
+            fontshadow
             padding
             background
             foreground
@@ -213,6 +214,16 @@ class _TextBox(_Widget):
             self.layout.font_size = value
 
     @property
+    def fontshadow(self):
+        return self._fontshadow
+
+    @fontshadow.setter
+    def fontshadow(self, value):
+        self._fontshadow = value
+        if self.layout:
+            self.layout.font_shadow = value
+
+    @property
     def actual_padding(self):
         if self.padding is None:
             return self.fontsize / 2
@@ -225,7 +236,8 @@ class _TextBox(_Widget):
                     self.text,
                     self.foreground,
                     self.font,
-                    self.fontsize
+                    self.fontsize,
+                    self.fontshadow,
                  )
 
     def calculate_width(self):
@@ -243,7 +255,8 @@ class _TextBox(_Widget):
         )
         self.drawer.draw(self.offset, self.width)
 
-    def cmd_set_font(self, font=UNSPECIFIED, fontsize=UNSPECIFIED):
+    def cmd_set_font(self, font=UNSPECIFIED, fontsize=UNSPECIFIED,
+            fontshadow=UNSPECIFIED):
         """
             Change the font used by this widget. If font is None, the current
             font is used.
@@ -252,4 +265,6 @@ class _TextBox(_Widget):
             self.font = font
         if fontsize is not UNSPECIFIED:
             self.fontsize = fontsize
+        if fontshadow is not UNSPECIFIED:
+            self.fontshadow = fontshadow
         self.bar.draw()
