@@ -71,7 +71,11 @@ class Qtile(command.CommandObject):
         if log == None:
             log = init_log()
         self.log = log
+        if hasattr(config, "log_level"):
+            self.log.setLevel(config.log_level)
+
         self.no_spawn = no_spawn
+
         if not displayName:
             displayName = os.environ.get("DISPLAY")
             if not displayName:
@@ -291,7 +295,8 @@ class Qtile(command.CommandObject):
             g._configure(
                 self.config.layouts, self.config.floating_layout, self)
             self.groupMap[name] = g
-            hook.fire("addgroup")
+            hook.fire("addgroup", self, name)
+            hook.fire("changegroup")
             self.update_net_desktops()
 
             return True
@@ -309,7 +314,8 @@ class Qtile(command.CommandObject):
                 self.currentGroup.cmd_prevgroup()
             self.groups.remove(group)
             del(self.groupMap[name])
-            hook.fire("delgroup")
+            hook.fire("delgroup", self, name)
+            hook.fire("changegroup")
             self.update_net_desktops()
 
 
